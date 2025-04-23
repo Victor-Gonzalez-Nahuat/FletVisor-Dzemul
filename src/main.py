@@ -2,7 +2,7 @@ import flet as ft
 import datetime
 import requests
 
-API_URL = "api-telchac-production.up.railway.app/"
+API_URL = "api-dzemul-production.up.railway.app/"
 
 def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.LIGHT
@@ -15,14 +15,14 @@ def main(page: ft.Page):
 
 
     logo = ft.Image(
-        src="https://i.ibb.co/PvvPNzhk/Imagen-de-Whats-App-2025-04-22-a-las-15-46-24-f6a2c21e.jpg", 
+        src="https://i.ibb.co/TqxbQnsq/Imagen-de-Whats-App-2025-04-23-a-las-10-14-29-559a5c08.jpg", 
         width=60,
         height=60,
         fit=ft.ImageFit.CONTAIN
     )
 
     titulo_empresa = ft.Text(
-        "TELCHAC PUERTO",
+        "DZEMUL",
         size=26,
         weight=ft.FontWeight.BOLD,
         color=ft.colors.WHITE
