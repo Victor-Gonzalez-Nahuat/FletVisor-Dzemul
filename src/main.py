@@ -6,7 +6,7 @@ API_URL = "api-dzemul-production.up.railway.app/"
 
 def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.LIGHT
-    page.theme = ft.Theme(color_scheme_seed=ft.Colors.RED)
+    page.theme = ft.Theme(color_scheme_seed=ft.Colors.ORANGE)
     page.title = "Recibos"
     page.padding = 10
 
@@ -43,14 +43,54 @@ def main(page: ft.Page):
         cursor_color=ft.colors.WHITE
     )
 
-    txt_fecha_desde = ft.TextField(label="Desde", read_only=True, width=150, value=hoy_str)
-    txt_fecha_hasta = ft.TextField(label="Hasta", read_only=True, width=150, value=hoy_str)
+    def formatear_fecha_yymmdd(fecha_str):
+        try:
+            if len(fecha_str) == 6:
+                # Extraemos partes
+                yy = int(fecha_str[:2])
+                mm = int(fecha_str[2:4])
+                dd = int(fecha_str[4:6])
+                
+                # Ajustamos año: si es menor a cierta cantidad, asumimos que es del 2000+
+                anio = 2000 + yy if yy < 50 else 1900 + yy  # puedes cambiar el "50" como frontera si es necesario
+
+                fecha_obj = datetime.date(anio, mm, dd)
+                return fecha_obj.strftime("%d-%m-%Y")
+        except Exception as e:
+            print("Error al formatear fecha:", e)
+        return fecha_str  # Por si no se puede parsear
+
+    def formatear_dd_mm_yyyy(fecha_str):
+        try:
+            # Intentamos primero como ISO
+            fecha_obj = datetime.datetime.fromisoformat(fecha_str)
+        except ValueError:
+            try:
+                # Intentamos como 'ddmmaa' o 'ddmmaaaa'
+                if len(fecha_str) == 6:
+                    fecha_obj = datetime.datetime.strptime(fecha_str, "%d%m%y")
+                elif len(fecha_str) == 8:
+                    fecha_obj = datetime.datetime.strptime(fecha_str, "%d%m%Y")
+                else:
+                    return fecha_str  # Si no encaja, lo devolvemos como está
+            except ValueError:
+                return fecha_str
+        return fecha_obj.strftime("%d-%m-%Y")
+
+    txt_fecha_desde = ft.TextField(label="Desde", read_only=True, width=150, value=formatear_dd_mm_yyyy(hoy_str), bgcolor=ft.colors.WHITE)
+    txt_fecha_desde.data = hoy_str  # Guardamos la fecha original
+
+    txt_fecha_hasta = ft.TextField(label="Hasta", read_only=True, width=150, value=formatear_dd_mm_yyyy(hoy_str), bgcolor=ft.colors.WHITE)
+    txt_fecha_hasta.data = hoy_str
+
+    
 
     def actualizar_fecha(text_field, nueva_fecha):
-        fecha_obj = datetime.datetime.fromisoformat(nueva_fecha)
-        fecha_formateada = fecha_obj.date().isoformat()
-        text_field.value = fecha_formateada
+        # Mantenemos el valor original como atributo
+        text_field.data = nueva_fecha  # Guardamos la fecha original aquí
+        text_field.value = formatear_dd_mm_yyyy(nueva_fecha)  # Mostramos en dd-mm-yyyy
         page.update()
+
 
     date_picker_desde = ft.DatePicker(
         on_change=lambda e: actualizar_fecha(txt_fecha_desde, e.data),
@@ -82,7 +122,7 @@ def main(page: ft.Page):
             ft.Row([txt_fecha_desde, txt_fecha_hasta])
         ]),
         padding=20,
-        bgcolor=ft.colors.RED,
+        bgcolor="#ff8400",
         border_radius=ft.BorderRadius(top_left=0, top_right=0, bottom_left=20, bottom_right=20),
     )
 
@@ -109,7 +149,7 @@ def main(page: ft.Page):
                         ft.Text(f"Recibo: {recibo['recibo']}", weight=ft.FontWeight.BOLD, size=18),
                         ft.Text(f"Contribuyente: {recibo['contribuyente']}"),
                         ft.Text(f"Concepto: {recibo['concepto']}"),
-                        ft.Text(f"Fecha: {recibo['fecha']}"),
+                        ft.Text(f"Fecha: {formatear_fecha_yymmdd(recibo['fecha'])}"),
                         ft.Text(f"Neto: ${recibo['neto']}", weight=ft.FontWeight.BOLD, color=ft.colors.GREEN_800),
                         ft.Text(f"Descuento: ${recibo['descuento']}")
                     ]),
@@ -133,10 +173,12 @@ def main(page: ft.Page):
         loader.visible = True
         page.update()
 
-        desde = txt_fecha_desde.value
-        hasta = txt_fecha_hasta.value
+        desde = txt_fecha_desde.data or hoy_str
+        hasta = txt_fecha_hasta.data or hoy_str
+
         desde_formateada = desde.replace("-", "")[2:]
         hasta_formateada = hasta.replace("-", "")[2:]
+
 
         print(f"Contribuyente: {nombre}, Desde: {desde_formateada}, Hasta: {hasta_formateada}")
 
