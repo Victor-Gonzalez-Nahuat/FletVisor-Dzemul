@@ -72,8 +72,8 @@ def main(page: ft.Page):
         border_radius=ft.BorderRadius(0, 0, 20, 20)
     )
 
-    resultado_card = ft.Container(content=ft.Column([], scroll=ft.ScrollMode.AUTO, height=400), padding=10)
-    totales_card = ft.Container(padding=10)
+    resultado_card = ft.Container(content=ft.Column([], scroll=ft.ScrollMode.AUTO, height=200), padding=10)
+    totales_card = ft.Container()
     loader = ft.ProgressRing(visible=False, color=ft.colors.ORANGE, stroke_width=4)
 
     def formatear_fecha_yymmdd(f):
@@ -108,7 +108,7 @@ def main(page: ft.Page):
             )
             recibos_widgets.append(tarjeta)
 
-        resultado_card.content = ft.Column(recibos_widgets, spacing=10, scroll=ft.ScrollMode.AUTO)
+        resultado_card.content = ft.Column(recibos_widgets, spacing=10, scroll=ft.ScrollMode.ALWAYS, height=200)
         page.update()
 
     def buscar_producto(nombre_raw):
@@ -166,7 +166,6 @@ def main(page: ft.Page):
             loader,
             totales_card,
             resultado_card,
-            ft.Row([loader], alignment=ft.MainAxisAlignment.CENTER)
         ], spacing=20)
     )
 
