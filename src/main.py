@@ -10,6 +10,11 @@ def main(page: ft.Page):
     page.title = "Recibos"
     page.padding = 10
 
+    todos_los_recibos = []
+    pagina_actual = 0
+    tamanio_pagina = 100
+
+
     hoy = datetime.date.today()
     hoy_str = hoy.isoformat()
 
@@ -81,10 +86,28 @@ def main(page: ft.Page):
             return datetime.datetime.strptime(f, "%y%m%d").strftime("%d-%m-%Y")
         except:
             return f
-
+        
+    def cambiar_pagina(delta):
+        nonlocal pagina_actual
+        pagina_actual += delta
+        mostrar_pagina()
+        
     def mostrar_resultados(data):
+        nonlocal todos_los_recibos, pagina_actual
+        todos_los_recibos = data
+        pagina_actual = 0
+        mostrar_pagina()
+
+    def mostrar_pagina():
+        nonlocal pagina_actual, tamanio_pagina, todos_los_recibos
+
+        inicio = pagina_actual * tamanio_pagina
+        fin = inicio + tamanio_pagina
+        fragmento = todos_los_recibos[inicio:fin]
+
         recibos_widgets = []
-        for r in data:
+
+        for r in fragmento:
             es_cancelado = r.get("status", r.get("id_status", "0")) == "1"
             color_texto = ft.colors.GREY if es_cancelado else ft.colors.BLACK
             estado = "❌ CANCELADO" if es_cancelado else ""
@@ -108,9 +131,19 @@ def main(page: ft.Page):
             )
             recibos_widgets.append(tarjeta)
 
-        resultado_card.content = ft.Column(recibos_widgets, spacing=10, scroll=ft.ScrollMode.ALWAYS, height=200)
-        page.update()
+        botones_navegacion = []
 
+        if pagina_actual > 0:
+            botones_navegacion.append(ft.ElevatedButton("⬅️ Anteriores 100", on_click=lambda e: cambiar_pagina(-1)))
+
+        if fin < len(todos_los_recibos):
+            botones_navegacion.append(ft.ElevatedButton("Siguientes 100 ➡️", on_click=lambda e: cambiar_pagina(1)))
+
+        resultado_card.content = ft.Column(
+            recibos_widgets + [ft.Row(botones_navegacion, alignment=ft.MainAxisAlignment.CENTER)],
+            spacing=10, scroll=ft.ScrollMode.ALWAYS, height=200
+        )
+        page.update()
     def buscar_producto(nombre_raw):
         buscar_btn.disabled = True
         loader.visible = True
