@@ -67,8 +67,8 @@ def main(page: ft.Page):
         content=ft.Column([
             ft.Row([logo, titulo_empresa]),
             titulo,
-            ft.Row([fecha_desde_btn, fecha_hasta_btn]),
-            ft.Row([txt_fecha_desde, txt_fecha_hasta]),
+            ft.Row([fecha_desde_btn, fecha_hasta_btn], alignment=ft.MainAxisAlignment.CENTER),
+            ft.Row([txt_fecha_desde, txt_fecha_hasta], alignment=ft.MainAxisAlignment.CENTER),
             ft.Row([buscar_btn], alignment=ft.MainAxisAlignment.START),
             contribuyente_input
         ]),
